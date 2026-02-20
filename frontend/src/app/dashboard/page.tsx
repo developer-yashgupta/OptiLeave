@@ -5,6 +5,21 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/MainLayout';
 import { LeaveBalance, LeaveRequest } from '@/types/leave';
 import apiClient from '@/lib/api-client';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 
 interface DashboardStats {
   totalRequests: number;
@@ -159,32 +174,127 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Leave Balance Breakdown */}
-        {balance && (
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Leave Status Distribution - Pie Chart */}
           <div className="glass-card p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Leave Balance</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-2xl font-bold text-blue-400">{balance.annual}</div>
-                <div className="text-xs text-gray-400 mt-1">Annual</div>
-              </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-2xl font-bold text-green-400">{balance.sick}</div>
-                <div className="text-xs text-gray-400 mt-1">Sick</div>
-              </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-2xl font-bold text-pink-400">{balance.maternity}</div>
-                <div className="text-xs text-gray-400 mt-1">Maternity</div>
-              </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-2xl font-bold text-purple-400">{balance.paternity}</div>
-                <div className="text-xs text-gray-400 mt-1">Paternity</div>
-              </div>
-              <div className="text-center p-4 bg-white/5 rounded-lg">
-                <div className="text-2xl font-bold text-orange-400">{balance.bereavement}</div>
-                <div className="text-xs text-gray-400 mt-1">Bereavement</div>
-              </div>
+            <h2 className="text-xl font-semibold text-white mb-4">Leave Status Distribution</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Approved', value: stats.approved, color: '#10b981' },
+                    { name: 'Pending', value: stats.pending, color: '#f59e0b' },
+                    { name: 'Rejected', value: stats.rejected, color: '#ef4444' },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {[
+                    { name: 'Approved', value: stats.approved, color: '#10b981' },
+                    { name: 'Pending', value: stats.pending, color: '#f59e0b' },
+                    { name: 'Rejected', value: stats.rejected, color: '#ef4444' },
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(127, 159, 230, 0.95)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Leave Balance Breakdown - Bar Chart */}
+          {balance && (
+            <div className="glass-card p-6">
+              <h2 className="text-xl font-semibold text-white mb-4">Leave Balance by Type</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={[
+                    { name: 'Annual', days: balance.annual, color: '#3b82f6' },
+                    { name: 'Sick', days: balance.sick, color: '#10b981' },
+                    { name: 'Maternity', days: balance.maternity, color: '#ec4899' },
+                    { name: 'Paternity', days: balance.paternity, color: '#8b5cf6' },
+                    { name: 'Bereavement', days: balance.bereavement, color: '#f97316' },
+                  ]}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="name" stroke="#9ca3af" />
+                  <YAxis stroke="#9ca3af" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(97, 139, 231, 0.95)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      color: '#fff',
+                    }}
+                  />
+                  <Bar dataKey="days" radius={[8, 8, 0, 0]}>
+                    {[
+                      { name: 'Annual', days: balance.annual, color: '#3b82f6' },
+                      { name: 'Sick', days: balance.sick, color: '#10b981' },
+                      { name: 'Maternity', days: balance.maternity, color: '#ec4899' },
+                      { name: 'Paternity', days: balance.paternity, color: '#8b5cf6' },
+                      { name: 'Bereavement', days: balance.bereavement, color: '#f97316' },
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
+          )}
+        </div>
+
+        {/* Leave Trend - Line Chart */}
+        {requests.length > 0 && (
+          <div className="glass-card p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">Leave Requests Timeline</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={requests
+                  .slice()
+                  .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+                  .slice(-10)
+                  .map((req) => ({
+                    date: formatDate(req.startDate),
+                    days: req.workingDays,
+                    type: req.leaveType,
+                  }))}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="date" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(127, 157, 223, 0.95)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="days"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={{ fill: '#8b5cf6', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         )}
 
