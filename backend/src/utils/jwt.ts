@@ -4,6 +4,7 @@ import { env } from '../config/env';
 export interface JWTPayload {
   userId: string;
   email: string;
+  name: string;
   role: string;
   teamId: string;
 }

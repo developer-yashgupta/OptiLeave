@@ -2,14 +2,18 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api-client'
 import { Notification } from '@/types/notification'
 
 export default function Header() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showNotifications, setShowNotifications] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const notificationRef = useRef<HTMLDivElement>(null)
+  const profileRef = useRef<HTMLDivElement>(null)
 
   // Fetch notifications
   useEffect(() => {
@@ -30,11 +34,14 @@ export default function Header() {
     }
   }, [user])
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false)
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false)
       }
     }
 
@@ -90,7 +97,7 @@ export default function Header() {
         {/* User profile */}
         <div className="flex items-center gap-4">
           {/* Notification bell */}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2 hover:bg-white/50 rounded-lg transition-all duration-200"
@@ -157,21 +164,93 @@ export default function Header() {
           </div>
 
           {/* User avatar and info */}
-          <div className="flex items-center gap-3 glass-panel px-4 py-2 rounded-lg">
-            {/* Avatar */}
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00d4ff] to-[#7000ff] flex items-center justify-center text-white font-semibold">
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            
-            {/* User info */}
-            <div className="text-left">
-              <div className="text-sm font-semibold text-black">{user?.name || 'User'}</div>
-              {user?.role && (
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${getRoleBadgeColor(user.role)}`}>
-                  {user.role}
-                </span>
-              )}
-            </div>
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-3 glass-panel px-4 py-2 rounded-lg hover:bg-white/50 transition-all cursor-pointer"
+            >
+              {/* Avatar */}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00d4ff] to-[#7000ff] flex items-center justify-center text-white font-semibold">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              
+              {/* User info */}
+              <div className="text-left">
+                <div className="text-sm font-semibold text-black">{user?.name || 'User'}</div>
+                {user?.role && (
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${getRoleBadgeColor(user.role)}`}>
+                    {user.role}
+                  </span>
+                )}
+              </div>
+
+              {/* Dropdown arrow */}
+              <svg 
+                className={`w-4 h-4 text-black/60 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Profile Dropdown */}
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-64 glass-panel rounded-xl shadow-xl border border-black/10 overflow-hidden z-50">
+                <div className="p-4 border-b border-black/5">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00d4ff] to-[#7000ff] flex items-center justify-center text-white font-semibold text-lg">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-black">{user?.name}</p>
+                      <p className="text-xs text-black/60">{user?.email}</p>
+                    </div>
+                  </div>
+                  <span className={`inline-block text-xs px-3 py-1 rounded-full border ${getRoleBadgeColor(user?.role)}`}>
+                    {user?.role}
+                  </span>
+                </div>
+
+                <div className="py-2">
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false)
+                      router.push('/profile')
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-white/50 transition-colors flex items-center gap-3"
+                  >
+                    <span className="text-lg">👤</span>
+                    <span className="text-sm font-medium text-black">My Profile</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false)
+                      router.push('/settings')
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-white/50 transition-colors flex items-center gap-3"
+                  >
+                    <span className="text-lg">⚙️</span>
+                    <span className="text-sm font-medium text-black">Settings</span>
+                  </button>
+
+                  <div className="border-t border-black/5 my-2"></div>
+
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false)
+                      logout()
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center gap-3 text-[#ff0055]"
+                  >
+                    <span className="text-lg">🚪</span>
+                    <span className="text-sm font-medium">Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

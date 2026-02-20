@@ -45,18 +45,19 @@ enum TaskStatus {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  password      String
-  name          String
-  role          UserRole
-  teamId        String
-  team          Team           @relation(fields: [teamId], references: [id], onDelete: Restrict)
-  leaveRequests LeaveRequest[]
-  tasks         Task[]
-  leaveBalance  LeaveBalance?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String         @id @default(uuid())
+  email          String         @unique
+  password       String
+  name           String
+  role           UserRole
+  teamId         String
+  team           Team           @relation(fields: [teamId], references: [id], onDelete: Restrict)
+  faceDescriptor Json?
+  leaveRequests  LeaveRequest[]
+  tasks          Task[]
+  leaveBalance   LeaveBalance?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([email])
   @@index([teamId])

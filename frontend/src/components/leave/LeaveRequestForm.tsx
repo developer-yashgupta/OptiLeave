@@ -121,7 +121,7 @@ export const LeaveRequestForm: React.FC<LeaveRequestFormProps> = ({
           required
         >
           {Object.entries(leaveTypeLabels).map(([value, label]) => (
-            <option key={value} value={value} className="bg-gray-800">
+            <option key={value} value={value} className="bg-white-800">
               {label}
             </option>
           ))}
