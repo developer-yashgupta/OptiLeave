@@ -15,11 +15,12 @@ dist/
 
 # Environment variables
 .env
-.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+frontend/.env
 
 # IDE
 .vscode/
@@ -44,8 +45,8 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Prisma
-backend/prisma/migrations/
+# Prisma (keep migrations for deployment)
+# backend/prisma/migrations/
 
 # Docker
 docker-compose.override.yml

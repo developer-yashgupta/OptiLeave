@@ -299,7 +299,31 @@ npm run test:coverage
 
 ## Deployment
 
-See [SETUP.md](./SETUP.md) for detailed deployment instructions.
+### Quick Deploy (FREE)
+
+Deploy to free platforms in 20 minutes:
+
+**📋 [Quick Checklist](./DEPLOY_CHECKLIST.md)** - Step-by-step checklist
+**📖 [Detailed Guide](./DEPLOY_FREE.md)** - Complete deployment guide
+
+**Recommended Free Platforms:**
+- Backend: Render.com (PostgreSQL + Redis included)
+- Frontend: Vercel (Perfect for Next.js)
+
+### Docker Deploy
+
+For VPS or local production:
+
+```bash
+# Copy environment file
+cp .env.example .env
+
+# Edit .env with your values
+# Then deploy
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for Docker deployment details.
 
 ## License
 
